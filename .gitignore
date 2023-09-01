@@ -1,0 +1,12 @@
+# Added by VSCode Plugin - SFDC QCP
+.qcp
+.env
+
+# Ignore everything in src
+/src/*
+# But don't ignore the src directory itself
+!/src/
+# And don't ignore QCP.ts inside src
+!/src/QCP.ts
+
+/tests
