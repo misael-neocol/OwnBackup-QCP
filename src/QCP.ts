@@ -11,7 +11,7 @@ export function onBeforePriceRules(quote, lines) {
         resolve();
     });
 }
-// 
+ 
 export function onBeforeCalculate(quote, lines, conn) {
 
     return new Promise((resolve, reject) => {
