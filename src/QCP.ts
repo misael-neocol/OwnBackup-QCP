@@ -778,6 +778,7 @@ function calculateLinesMRR (quote, lines){
             line.record.Services_CPQ__c = 0;
         }
     });
+    
     let serviceLines = getServiceLines(lines);
     serviceLines.forEach(line => {
         if(isLineMRREligible(line)){
