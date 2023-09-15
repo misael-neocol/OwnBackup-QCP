@@ -50,7 +50,10 @@ export function onAfterCalculate(quote, lines) {
         checkMinimumAmount(quote, lines);
         checkMinimumAmountPlatByosBr(quote, lines)
 
-        calculateLinesMRR (quote, lines);
+        // calculateLinesMRR(quote, lines);
+        console.log("Starting the calculateRevenueMetrics Function");
+        calculateRevenueMetrics(quote, lines)
+
         setQuoteLineYear(quote, lines);
         rollupQuoteMRR(quote, lines);
 
@@ -68,6 +71,75 @@ function debug(...args) {
         console.log(...args);
     }
 }
+
+function calculateRevenueMetrics(quote, lines) {
+    console.log("calculateRevenueMetrics__Start");
+  
+    // Loop through each quote line to apply the logic
+    lines.forEach((quoteLine, index) => {
+      console.log(`calculateRevenueMetrics__Processing quoteLine ${index + 1}`);
+  
+      const productCode = quoteLine.record.SBQQ__ProductCode__c;
+      const isService = [
+        "SRV-SECR-OBRD",
+        "SRV-ARCH-OBRD",
+        "SRV-PREM-PLUS",
+        "SRV-PROF-SERV",
+        "SRV-PE-SERV",
+        "SRV-PREM-SUP",
+        "SRV-TAM-SERV",
+        "SRV-BR-OBRD",
+        "SRV-SRA-SERV",
+        "SRV-STD-SUP",
+      ].includes(productCode);
+  
+      if (isService) {
+        console.log("calculateRevenueMetrics__SERVICE__SBQQ__Quote__c ", quoteLine.record.SBQQ__Quote__c );
+        console.log("calculateRevenueMetrics__SERVICE__quoteLine.record.SBQQ__ProductCode__c", quoteLine.record.SBQQ__ProductCode__c);
+        console.log("calculateRevenueMetrics__SERVICE__quoteLine.record.SBQQ__NetTotal__c", quoteLine.record.SBQQ__NetTotal__c);
+        console.log("calculateRevenueMetrics__SERVICE__quoteLine.record.SBQQ__ProrateMultiplier__c", quoteLine.record.SBQQ__ProrateMultiplier__c);
+        console.log("calculateRevenueMetrics__SERVICE__quoteLine.record.SBQQ__DefaultSubscriptionTerm__c", quoteLine.record.SBQQ__DefaultSubscriptionTerm__c);
+        console.log("calculateRevenueMetrics__SERVICE__quoteLine.record.Year__c", quoteLine.record.Year__c);
+        
+        console.log("calculateRevenueMetrics__SERVICE__quoteLine.record", quoteLine.record);
+
+
+        // Service Quote Line logic
+        // quoteLine.record.MRR_CPQ__c = 0; // Scott -> No need to populate this field for Service QLs
+        quoteLine.record.ARR_CPQ__c = quoteLine.record.MRR_CPQ__c * 12;
+        quoteLine.record.Services_CPQ__c = quoteLine.record.Year__c === 1 ? quoteLine.record.SBQQ__NetTotal__c : 0;
+        quoteLine.record.First_Year_CPQ__c = quoteLine.record.Year__c === 1 ? true : false;
+
+        // console.log("calculateRevenueMetrics__SERVICE__quoteLine.record.MRR_CPQ__c", quoteLine.record.MRR_CPQ__c);
+        // console.log("calculateRevenueMetrics__SERVICE__quoteLine.record.ARR_CPQ__c", quoteLine.record.ARR_CPQ__c);
+        // console.log("calculateRevenueMetrics__SERVICE__quoteLine.record.Services_CPQ__c", quoteLine.record.Services_CPQ__c);
+        // console.log("calculateRevenueMetrics__SERVICE__quoteLine.record.First_Year_CPQ__c", quoteLine.record.First_Year_CPQ__c);
+      } else {        
+        console.log("calculateRevenueMetrics__RECURRING__SBQQ__Quote__c ", quoteLine.record.SBQQ__Quote__c );
+        console.log("calculateRevenueMetrics__RECURRING__quoteLine.record.SBQQ__ProductCode__c", quoteLine.record.SBQQ__ProductCode__c);
+        console.log("calculateRevenueMetrics__RECURRING__quoteLine.record.SBQQ__NetTotal__c", quoteLine.record.SBQQ__NetTotal__c);
+        console.log("calculateRevenueMetrics__RECURRING__quoteLine.record.SBQQ__ProrateMultiplier__c", quoteLine.record.SBQQ__ProrateMultiplier__c);
+        console.log("calculateRevenueMetrics__RECURRING__quoteLine.record.SBQQ__DefaultSubscriptionTerm__c", quoteLine.record.SBQQ__DefaultSubscriptionTerm__c);
+        console.log("calculateRevenueMetrics__RECURRING__quoteLine.record.Year__c", quoteLine.record.Year__c);
+        
+        console.log("calculateRevenueMetrics__RECURRING__quoteLine.record", quoteLine.record);
+
+
+        // Recurring Quote Line logic
+        quoteLine.record.MRR_CPQ__c = quoteLine.record.SBQQ__NetTotal__c / quoteLine.record.SBQQ__ProrateMultiplier__c / quoteLine.record.SBQQ__DefaultSubscriptionTerm__c;
+        quoteLine.record.ARR_CPQ__c = quoteLine.record.MRR_CPQ__c * 12;
+        quoteLine.record.Services_CPQ__c = quoteLine.record.Year__c === 1 ? quoteLine.record.SBQQ__NetTotal__c : 0;
+        quoteLine.record.First_Year_CPQ__c = quoteLine.record.Year__c === 1 ? true : false; 
+
+        // console.log("calculateRevenueMetrics__RECURRING__quoteLine.record.MRR_CPQ__c", quoteLine.record.MRR_CPQ__c);
+        // console.log("calculateRevenueMetrics__RECURRING__quoteLine.record.ARR_CPQ__c", quoteLine.record.ARR_CPQ__c);
+        // console.log("calculateRevenueMetrics__RECURRING__quoteLine.record.Services_CPQ__c", quoteLine.record.Services_CPQ__c);
+        // console.log("calculateRevenueMetrics__RECURRING__quoteLine.record.First_Year_CPQ__c", quoteLine.record.First_Year_CPQ__c);
+      }
+    });
+  
+    console.log("calculateRevenueMetrics__End");
+  }  
 
 
 function validateOnboardingCount(quote, lines){
@@ -649,12 +721,18 @@ function cascadeQuantity(quote, lines){
     //Get all bundle lines and loop through it to set the License Type
     let bundleLines = lines.filter( line => line.components.length > 0);
     let quoteMinimumQuantity = findMinimumQuantity(lines);
+
     bundleLines.forEach(bundle => {
         
         //Cascade the License Type from bundle to the component
         bundle.components.forEach(component => {
             
             let currentQuantity = component.record.Override_Quantity__c ? component.record.Override_Quantity__c : bundle.record.SBQQ__Quantity__c;
+            
+            console.log("component: ", component);
+            console.log("currentQuantity: ", currentQuantity);
+            console.log("quoteMinimumQuantity: ", quoteMinimumQuantity);
+
             if(isQuantityCascadeEligible(component, currentQuantity, quoteMinimumQuantity)){
                 component.record.SBQQ__Quantity__c = currentQuantity;
             } 
@@ -668,9 +746,13 @@ function cascadeQuantity(quote, lines){
 
 //Function that determines if the line is eligible to have the License Type cascaded 
 function isQuantityCascadeEligible (line, currentBundleQuantity, quoteMinimumQuantity){
+
+    console.log("line.record.Exclude_Quantity_Cascade__c", line.record.Exclude_Quantity_Cascade__c);
     //let minimumQuantityAccrossQuoteLines = getMinimumQuantityForProduct(lines, line.record.SBQQ__ProductCode__c)
     return !(//isCurrentSubscription(line) || 
                 line.record.Exclude_Quantity_Cascade__c //|| 
+
+                
                 //line.record.Override_Quantity__c || 
                 //(line.record.Minimum_Users__c && line.record.Minimum_Users__c > 0 && currentBundleQuantity < quoteMinimumQuantity)
             );
