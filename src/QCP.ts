@@ -49,6 +49,7 @@ export function onAfterCalculate(quote, lines) {
         validateOnboardingCount(quote, lines);
         checkMinimumAmount(quote, lines);
         checkMinimumAmountPlatByosBr(quote, lines)
+        
 
         // calculateLinesMRR(quote, lines);
         console.log("Starting the calculateRevenueMetrics Function");
