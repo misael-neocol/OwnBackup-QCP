@@ -721,18 +721,12 @@ function cascadeQuantity(quote, lines){
     //Get all bundle lines and loop through it to set the License Type
     let bundleLines = lines.filter( line => line.components.length > 0);
     let quoteMinimumQuantity = findMinimumQuantity(lines);
-
     bundleLines.forEach(bundle => {
         
         //Cascade the License Type from bundle to the component
         bundle.components.forEach(component => {
             
             let currentQuantity = component.record.Override_Quantity__c ? component.record.Override_Quantity__c : bundle.record.SBQQ__Quantity__c;
-            
-            console.log("component: ", component);
-            console.log("currentQuantity: ", currentQuantity);
-            console.log("quoteMinimumQuantity: ", quoteMinimumQuantity);
-
             if(isQuantityCascadeEligible(component, currentQuantity, quoteMinimumQuantity)){
                 component.record.SBQQ__Quantity__c = currentQuantity;
             } 
@@ -746,13 +740,9 @@ function cascadeQuantity(quote, lines){
 
 //Function that determines if the line is eligible to have the License Type cascaded 
 function isQuantityCascadeEligible (line, currentBundleQuantity, quoteMinimumQuantity){
-
-    console.log("line.record.Exclude_Quantity_Cascade__c", line.record.Exclude_Quantity_Cascade__c);
     //let minimumQuantityAccrossQuoteLines = getMinimumQuantityForProduct(lines, line.record.SBQQ__ProductCode__c)
     return !(//isCurrentSubscription(line) || 
                 line.record.Exclude_Quantity_Cascade__c //|| 
-
-                
                 //line.record.Override_Quantity__c || 
                 //(line.record.Minimum_Users__c && line.record.Minimum_Users__c > 0 && currentBundleQuantity < quoteMinimumQuantity)
             );
