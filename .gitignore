@@ -3,12 +3,19 @@
 .env
 
 # Ignore everything in src
-/src/*
-# But don't ignore the src directory itself
-!/src/
-# And don't ignore QCP.ts inside src
-!/src/QCP.ts
+/SF_QCP__FullSB/src/*
+/SF_QCP__Dev/src/*
 
-/tests
-/node_modules
-README.md
+/SF_QCP__FullSB/tests
+/SF_QCP__FullSB/node_modules
+/SF_QCP__Dev/tests
+/SF_QCP__Dev/node_modules
+
+# But don't ignore the src directory itself
+!/SF_QCP__Dev/src/
+!/SF_QCP__FullSB/src/
+
+# And don't ignore QCP.ts inside src
+!/SF_QCP__Dev/src/QCP.ts
+!/SF_QCP__FullSB/src/QCP.ts
+
